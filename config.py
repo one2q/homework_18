@@ -4,3 +4,4 @@ class Config:
 	JSON_AS_ASCII = False
 	DEBUG = True
 	RESTX_JSON = {'ensure_ascii': False, 'indent': 4}
+	PORT = 8080
