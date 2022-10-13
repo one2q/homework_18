@@ -1,7 +1,8 @@
 from flask_restx import Namespace, Resource
 
-from dao.model.director import DirectorSchema, Director
-from setup_db import db
+from container import director_service
+from dao.model.director import DirectorSchema
+
 
 director_ns = Namespace('directors')
 
@@ -12,20 +13,12 @@ directors_schema = DirectorSchema(many=True)
 @director_ns.route('/')
 class DirectorsViews(Resource):
 	def get(self):
-		try:
-			directors = db.session.query(Director).all()
-			return directors_schema.dump(directors), 200
-		except Exception as e:
-			print(e)
-			return e, 200
+		genres = director_service.get_all()
+		return directors_schema.dump(genres), 200
 
 
 @director_ns.route('/<int:pk>')
 class DirectorViews(Resource):
 	def get(self, pk):
-		try:
-			director = db.session.query(Director).get(pk)
-			return director_schema.dump(director), 200
-		except Exception as e:
-			print(e)
-			return e, 200
+		genre = director_service.get_one(pk)
+		return director_schema.dump(genre), 200

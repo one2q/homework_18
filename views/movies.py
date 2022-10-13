@@ -1,8 +1,9 @@
 from flask import request
 from flask_restx import Namespace, Resource
 
+from container import movie_service
 from dao.model.movie import MovieSchema, Movie
-from setup_db import db
+
 
 movie_ns = Namespace('movies')
 
@@ -13,56 +14,46 @@ movies_schema = MovieSchema(many=True)
 @movie_ns.route('/')
 class MoviesViews(Resource):
 	def get(self):
-		movies = db.session.query(Movie).all()
+
+		director_request = request.args.get('director_id')
+		genre_request = request.args.get('genre_id')
+		year_request = request.args.get('year')
+
+		if director_request:
+			movies = movie_service.get_by_director(director_request)
+			return movies_schema.dump(movies), 200
+		if genre_request:
+			movies = movie_service.get_by_genre(genre_request)
+			return movies_schema.dump(movies), 200
+		if year_request:
+			movies = movie_service.get_by_year(year_request)
+			return movies_schema.dump(movies), 200
+
+		movies = movie_service.get_all()
 		return movies_schema.dump(movies), 200
 
 	def post(self):
 		data = request.json
-		try:
-			db.session.add(Movie(**data))
-			return 'Ok', 200
-		except Exception as e:
-			print(e)
-			db.session.rollback()
-			return e, 200
+		movie_service.create(data)
+		return 'ok', 201
 
 
 @movie_ns.route('/<int:pk>')
-class MoviesViews(Resource):
-	def get(self, pk):
-		movie = db.session.query(Movie).get(pk)
+class MovieViews(Resource):
+	def get(self, pk: int):
+		movie = movie_service.get_one(pk)
 		return movie_schema.dump(movie), 200
 
-	# def post(self, pk):
-	# 	data = request.json
-	# 	try:
-	# 		movie = db.session.query(Movie).get(pk)
-	# 		movie = Movie(**data)
-	# 		db.session.add(movie)
-	# 		return 'Ok', 200
-	# 	except Exception as e:
-	# 		print(e)
-	# 		db.session.rollback()
-	# 		return e, 200
-
-	def put(self, pk):
+	def put(self, pk: int):
 		data = request.json
-		try:
-			db.session.execute(db.update(Movie).where(Movie.id == pk).values(**data))
-			db.session.commit()
-			return 'ok', 200
-		except Exception as e:
-			print(e)
-			db.session.rollback()
-			return e, 200
+		movie_service.update(data, pk)
+		return 'ok', 202
 
-	def delete(self, pk):
-		try:
-			movie = db.session.query(Movie).get(pk)
-			db.session.delete(movie)
-			db.session.commit()
-			return 'Ok', 200
-		except Exception as e:
-			print(e)
-			db.session.rollback()
-			return e, 200
+	def patch(self, pk: int):
+		data = request.json
+		movie_service.update(data, pk)
+		return 'ok', 202
+
+	def delete(self, pk: int):
+		movie_service.delete(pk)
+		return 'Ok', 200

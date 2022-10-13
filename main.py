@@ -7,14 +7,14 @@ from views.directors import director_ns
 from views.genres import genre_ns
 from views.movies import movie_ns
 
-
+# Create Flask app
 def create_app(config: Config) -> Flask:
 	application = Flask(__name__)
 	application.config.from_object(config)
 	application.app_context().push()
 	return application
 
-
+# Configuration Flask app
 def configure_app(application: Flask):
 	db.init_app(application)
 	api = Api(application)
@@ -28,4 +28,4 @@ if __name__ == '__main__':
 	config = Config()
 	app = create_app(config)
 	configure_app(app)
-	app.run(port=8000, debug=True)
+	app.run(port=8080)

@@ -5,6 +5,7 @@ from dao.model.genre import GenreSchema
 from setup_db import db
 
 
+# Describe movie table for db
 class Movie(db.Model):
 	__tablename__ = 'movie'
 	id = db.Column(db.Integer, primary_key=True)
@@ -19,6 +20,7 @@ class Movie(db.Model):
 	director = db.relationship("Director")
 
 
+# Describe movie table for serialization
 class MovieSchema(Schema):
 	id = fields.Int()
 	title = fields.Str()
@@ -27,6 +29,6 @@ class MovieSchema(Schema):
 	year = fields.Int()
 	rating = fields.Str()
 	genre_id = fields.Int()
-	genre = fields.Pluck(nested=GenreSchema, field_name='name')
+	genre = fields.Pluck(GenreSchema, 'name')
 	director_id = fields.Int()
 	director = fields.Pluck(DirectorSchema, 'name')
